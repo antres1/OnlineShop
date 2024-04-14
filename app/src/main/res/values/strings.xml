@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">Online Shop</string>
+    <string name="login">LOGIN</string>
+    <string name="register">REGISTER</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="username">Username:</string>
+    <string name="email">Email:</string>
+    <string name="password">Password:</string>
+    <string name="home">HOME</string>
+    <string name="menu">MENU</string>
+    <string name="bag">BAG</string>
+    <string name="welcome">Welcome</string>
+    <string name="account">ACCOUNT</string>
+    <string name="purchase_history">PURCHASE HISTORY</string>
+    <string name="my_profile">MY PROFILE</string>
+    <string name="HomeActivityTag">HomeActivityTag</string>
+    <string name="email1">Email</string>
+    <string name="username1">Username</string>
+    <string name="pasword">PASWORD</string>
+    <string name="end_session">END SESSION</string>
+    <string name="title_activity_password">PasswordActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="change_password">Change password</string>
+    <string name="current_password">Current password</string>
+    <string name="new_password">New password</string>
+    <string name="save">SAVE</string>
+    <string name="title_activity_item">ItemActivity</string>
+    <string name="back">BACK</string>
+    <string name="MenuFragmentTag">MyNewFragmentIdentifier</string>
+    <string name="add">ADD</string>
+    <string name="status">Status:</string>
+    <string name="date">Date:</string>
+    <string name="price">Price:</string>
+</resources>
