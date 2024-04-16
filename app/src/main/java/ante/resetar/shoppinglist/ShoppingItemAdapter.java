@@ -51,6 +51,11 @@ public class ShoppingItemAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void clearList(){
+        itemsList.clear();
+        notifyDataSetChanged();
+    }
+
     private class ViewHolder {
         ImageView image;
         TextView name;

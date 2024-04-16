@@ -49,6 +49,11 @@ public class PurchaseHistoryItemAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void clearList(){
+        itemsList.clear();
+        notifyDataSetChanged();
+    }
+
     private class ViewHolder {
         TextView status;
         TextView date;
