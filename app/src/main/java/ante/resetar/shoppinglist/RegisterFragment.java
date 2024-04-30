@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -22,6 +23,9 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     EditText passwordEditText;
     Button registerButton;
     Bundle bundle;
+
+    OnlineShopDbHelper dbHelper;
+    private final String DB_NAME = "OnlineShop.db";
 
 
     // TODO: Rename parameter arguments, choose names that match
@@ -74,6 +78,9 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         passwordEditText = v.findViewById(R.id.passwordEditText);
         registerButton = v.findViewById(R.id.registerButton);
         registerButton.setOnClickListener(this);
+
+        dbHelper = new OnlineShopDbHelper(getContext(), DB_NAME, null, 1);
+
         return v;
     }
 
@@ -81,16 +88,22 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.registerButton:
-                if(usernameEditText.getText().toString().equals("admin") && passwordEditText.getText().toString().equals("admin")){
-                    Intent intent = new Intent(getActivity(), HomeActivity.class);
-                    bundle = new Bundle();
-                    bundle.putString("username", usernameEditText.getText().toString());
-                    bundle.putString("email", emailEditText.getText().toString());
-                    //intent.putExtra("username", usernameEditText.getText().toString());
-                    //intent.putExtra("email", emailEditText.getText().toString());
-                    //intent.putExtra("password", passwordEditText.getText().toString());
-                    intent.putExtras(bundle);
-                    startActivity(intent);
+                String username = usernameEditText.getText().toString().trim();
+                String mail = emailEditText.getText().toString().trim();
+                String password = passwordEditText.getText().toString();
+
+                if(!username.isEmpty() && !mail.isEmpty() && !password.isEmpty()){
+                    if(!dbHelper.userExists(username)){
+                        dbHelper.insertUser(new User(username, mail, password));
+                        Intent intent = new Intent(getActivity(), HomeActivity.class);
+                        bundle = new Bundle();
+                        bundle.putString("username", username);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                    }else{
+                        Toast.makeText(getActivity(), "User already exists", Toast.LENGTH_LONG).show();
+                    }
+
                 }
                 break;
             default:

@@ -21,6 +21,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     EditText loginUsernameEditText;
     EditText loginPaswordEditText;
 
+    OnlineShopDbHelper dbHelper;
+    private final String DB_NAME = "OnlineShop.db";
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -72,6 +75,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         loginButton.setOnClickListener(this);
         loginUsernameEditText = v.findViewById(R.id.loginUsernameEditText);
         loginPaswordEditText = v.findViewById(R.id.loginPasswordEditText);
+
+        dbHelper = new OnlineShopDbHelper(getContext(), DB_NAME, null, 1);
+
         return v;
     }
 
@@ -79,7 +85,16 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.loginButton:
+                /*
                 if(loginUsernameEditText.getText().toString().equals("admin") && loginPaswordEditText.getText().toString().equals("admin")){
+                    Intent intent = new Intent(getActivity(), HomeActivity.class);
+                    intent.putExtra("username", loginUsernameEditText.getText().toString());
+                    startActivity(intent);
+                }
+                 */
+                String username = loginUsernameEditText.getText().toString();
+                String pass = loginPaswordEditText.getText().toString();
+                if(dbHelper.correctUsernameAndPassword(username, pass)){
                     Intent intent = new Intent(getActivity(), HomeActivity.class);
                     intent.putExtra("username", loginUsernameEditText.getText().toString());
                     startActivity(intent);

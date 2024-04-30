@@ -15,16 +15,25 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     TextView usernameTextView;
     TextView emailTextView;
 
+    OnlineShopDbHelper dbHelper;
+    private final String DB_NAME = "OnlineShop.db";
+
+    String username;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        dbHelper = new OnlineShopDbHelper(this, DB_NAME, null, 1);
+
         passwordButton = findViewById(R.id.passwordActivityButton);
         endSessionButton = findViewById(R.id.endSessionButton);
         usernameTextView = findViewById(R.id.usernameTextView2);
         emailTextView = findViewById(R.id.emailTextView);
-        usernameTextView.setText(getIntent().getStringExtra("username"));
-        emailTextView.setText(getIntent().getStringExtra("email"));
+        username = getIntent().getStringExtra("username");
+        usernameTextView.setText(username);
+        emailTextView.setText(dbHelper.getEmailByUsername(username));
         passwordButton.setOnClickListener(this);
         endSessionButton.setOnClickListener(this);
     }
@@ -34,6 +43,9 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         switch(view.getId()){
             case R.id.passwordActivityButton:
                 Intent intent1 = new Intent(ProfileActivity.this, PasswordActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("username", username);
+                intent1.putExtras(bundle);
                 startActivity(intent1);
                 break;
             case R.id.endSessionButton:
