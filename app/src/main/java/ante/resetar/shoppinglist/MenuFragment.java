@@ -104,8 +104,8 @@ public class MenuFragment extends Fragment {
         String[] categories = dbHelper.findCategories();
         if (categories == null || categories.length == 0) {
             insertItemsIntoDatabase();
+            categories = dbHelper.findCategories();
         }
-        categories = dbHelper.findCategories();
         for (String category : categories) {
             adapter.add(category);
         }
