@@ -5,8 +5,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.Base64;
 
 import androidx.annotation.Nullable;
+
+import java.io.ByteArrayOutputStream;
 
 public class OnlineShopDbHelper extends SQLiteOpenHelper {
     private final String TABLE1_NAME = "korisnici";
@@ -14,6 +22,12 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
     public static final String TABLE1_MAIL = "mail";
     public static final String TABLE1_PASSWORD = "password";
     public static final String TABLE1_ID = "ID";
+
+    private final String TABLE2_NAME = "stavke";
+    public static final String TABLE2_IMAGE_NAME = "imageName";
+    public static final String TABLE2_ITEM_NAME = "itemName";
+    public static final String TABLE2_CATEGORY = "category";
+    public static final String TABLE2_PRICE = "price";
 
     public OnlineShopDbHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
@@ -26,6 +40,11 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
                 TABLE1_MAIL + " TEXT, " +
                 TABLE1_PASSWORD + " TEXT, " +
                 TABLE1_ID + " INTEGER PRIMARY KEY AUTOINCREMENT);");
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE2_NAME +
+                " (" + TABLE2_IMAGE_NAME + " BLOB, " +
+                TABLE2_ITEM_NAME + " TEXT, " +
+                TABLE2_CATEGORY + " TEXT, " +
+                TABLE2_PRICE + " TEXT);");
     }
 
     @Override
@@ -45,11 +64,52 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         close();
     }
 
+    // Convert Drawable to Bitmap
+    public Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
+    }
+
+    // Convert Bitmap to Byte Array
+    public byte[] bitmapToByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
+
+    public void insertItem(ShoppingItem item) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        Bitmap bitmap = drawableToBitmap(item.getImage());
+        byte[] imageBytes = bitmapToByteArray(bitmap);
+        values.put(TABLE2_IMAGE_NAME, imageBytes);
+        values.put(TABLE2_ITEM_NAME, item.getName());
+        values.put(TABLE2_CATEGORY, item.getCategory());
+        values.put(TABLE2_PRICE, item.getPrice());
+
+        db.insert(TABLE2_NAME, null, values);
+        close();
+    }
+
     public void deleteUser(int id) {
         SQLiteDatabase db = getWritableDatabase();
         db.delete(TABLE1_NAME, TABLE1_ID + " =?", new String[]{String.valueOf(id)});
         close();
     }
+
+    //public void deleteItem(String itemName)
 
     public User[] readUsers() {
         SQLiteDatabase db = getReadableDatabase();
@@ -68,6 +128,23 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         return users;
     }
 
+    public ShoppingItem[] readItems(Context context) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE2_NAME, null, null, null, null, null, null);
+
+        if (cursor.getCount() <= 0) {
+            return null;
+        }
+        ShoppingItem[] items = new ShoppingItem[cursor.getCount()];
+        int i = 0;
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            items[i++] = createItem(context, cursor);
+        }
+
+        close();
+        return items;
+    }
+
     public User readUser(int id) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TABLE1_NAME, null, TABLE1_ID + " =?", new String[] {String.valueOf(id)}, null, null, null);
@@ -84,12 +161,33 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         return user;
     }
 
+    //public ShoppingItem readItem(String itemName)
+
     private User createUser(Cursor cursor) {
         String username = cursor.getString(cursor.getColumnIndexOrThrow(TABLE1_USERNAME));
         String mail = cursor.getString(cursor.getColumnIndexOrThrow(TABLE1_MAIL));
         String passoword = cursor.getString(cursor.getColumnIndexOrThrow(TABLE1_PASSWORD));
 
         return new User(username, mail, passoword);
+    }
+
+    private Drawable byteToDrawable(Context context, byte[] imageBytes) {
+        if (imageBytes == null) {
+            return null;
+        }
+        Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        return new BitmapDrawable(context.getResources(), bitmap);
+    }
+
+    private ShoppingItem createItem(Context context, Cursor cursor) {
+        String itemName = cursor.getString(cursor.getColumnIndexOrThrow(TABLE2_ITEM_NAME));
+        byte[] imageBytes = cursor.getBlob(cursor.getColumnIndexOrThrow(TABLE2_IMAGE_NAME));
+        String price = cursor.getString(cursor.getColumnIndexOrThrow(TABLE2_PRICE));
+        String category = cursor.getString(cursor.getColumnIndexOrThrow(TABLE2_CATEGORY));
+
+        Drawable drawable = byteToDrawable(context, imageBytes);
+
+        return new ShoppingItem(drawable, itemName, price, category);
     }
 
     public boolean correctUsernameAndPassword(String username, String password) {
@@ -246,4 +344,49 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         return correctPassword;
     }
 
+    public String[] findCategories() {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(true, TABLE2_NAME, new String[]{TABLE2_CATEGORY}, null, null, null, null, null, null);
+
+        if (cursor == null || cursor.getCount() <= 0) {
+            return null;
+        }
+
+        String[] categories = new String[cursor.getCount()];
+        int i = 0;
+        while (cursor.moveToNext()) {
+            categories[i++] = cursor.getString(cursor.getColumnIndexOrThrow(TABLE2_CATEGORY));
+        }
+
+        cursor.close();
+        db.close();
+
+        return categories;
+    }
+
+    public ShoppingItem[] getItemsByCategory(Context context, String category) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE2_NAME, null, TABLE2_CATEGORY + " = ?", new String[]{category}, null, null, null);
+
+        if (cursor == null || cursor.getCount() <= 0) {
+            // No items found for the given category
+            return null;
+        }
+
+        ShoppingItem[] items = new ShoppingItem[cursor.getCount()];
+        int i = 0;
+        while (cursor.moveToNext()) {
+            String itemName = cursor.getString(cursor.getColumnIndexOrThrow(TABLE2_ITEM_NAME));
+            byte[] imageBytes = cursor.getBlob(cursor.getColumnIndexOrThrow(TABLE2_IMAGE_NAME));
+            String price = cursor.getString(cursor.getColumnIndexOrThrow(TABLE2_PRICE));
+
+            Drawable drawable = byteToDrawable(context, imageBytes);
+            items[i++] = new ShoppingItem(drawable, itemName, price, category);
+        }
+
+        cursor.close();
+        db.close();
+
+        return items;
+    }
 }

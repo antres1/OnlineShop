@@ -6,11 +6,13 @@ public class ShoppingItem {
     private Drawable image;
     private String name;
     private String price;
+    private String category;
 
-    public ShoppingItem(Drawable image, String name, String price) {
+    public ShoppingItem(Drawable image, String name, String price, String category) {
         this.image = image;
         this.name = name;
         this.price = price;
+        this.category = category;
     }
 
     public Drawable getImage() {
@@ -35,5 +37,13 @@ public class ShoppingItem {
 
     public void setPrice(String price) {
         this.price = price;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

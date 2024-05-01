@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -21,6 +22,9 @@ import androidx.fragment.app.Fragment;
  */
 
 public class MenuFragment extends Fragment {
+
+    OnlineShopDbHelper dbHelper;
+    private final String DB_NAME = "OnlineShop.db";
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -95,11 +99,17 @@ public class MenuFragment extends Fragment {
         list1 = view.findViewById(R.id.list1);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1);
         list1.setAdapter(adapter);
-        adapter.add("Snacks");
-        adapter.add("Drinks");
-        adapter.add("Fruit");
-        adapter.add("Vegetables");
-        adapter.add("Sweets");
+        dbHelper = new OnlineShopDbHelper(getContext(), DB_NAME, null, 1);
+
+        String[] categories = dbHelper.findCategories();
+        if (categories == null || categories.length == 0) {
+            insertItemsIntoDatabase();
+        }
+        categories = dbHelper.findCategories();
+        for (String category : categories) {
+            adapter.add(category);
+        }
+
         list1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -114,6 +124,28 @@ public class MenuFragment extends Fragment {
             }
         });
         return view;
+    }
+
+    private void insertItemsIntoDatabase() {
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.chipsy), "Chipsy", "185 RSD", "Snacks"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.brusketi), "Brusketi", "180 RSD", "Snacks"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.bake_rolls), "Bake Rolls", "220 RSD", "Snacks"));
+
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.booster), "Booster", "110 RSD", "Drinks"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.cockta), "Cockta", "160 RSD", "Drinks"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.fanta_shokata), "Fanta Shokata", "180 RSD", "Drinks"));
+
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.ananas), "Pineapple", "200 RSD", "Fruit"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.avokado), "Avocado", "260 RSD", "Fruit"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.banane), "Banana", "120 RSD", "Fruit"));
+
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.beli_luk), "Garlic", "160 RSD", "Vegetables"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.crni_luk), "Onion", "180 RSD", "Vegetables"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.celer), "Celery", "180 RSD", "Vegetables"));
+
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.bananica), "Bananica", "30 RSD", "Sweets"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.bounty), "Bounty", "70 RSD", "Sweets"));
+        dbHelper.insertItem(new ShoppingItem(getActivity().getDrawable(R.drawable.bueno), "Bueno", "110 RSD", "Sweets"));
     }
 
     @Override

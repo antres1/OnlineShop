@@ -13,8 +13,12 @@ public class ItemActivity extends AppCompatActivity implements View.OnClickListe
     Button backButton;
     TextView categoryText;
     ListView list;
+    String category;
 
     ShoppingItemAdapter adapter;
+
+    OnlineShopDbHelper dbHelper;
+    private final String DB_NAME = "OnlineShop.db";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,13 +28,18 @@ public class ItemActivity extends AppCompatActivity implements View.OnClickListe
         backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(this);
         categoryText = findViewById(R.id.categoryTextView);
-        categoryText.setText(getIntent().getStringExtra("category"));
+        category = getIntent().getStringExtra("category");
+        categoryText.setText(category);
+
+        dbHelper = new OnlineShopDbHelper(this, DB_NAME, null, 1);
 
         list = findViewById(R.id.itemList);
         adapter = new ShoppingItemAdapter(this);
         list.setAdapter(adapter);
 
-        switch(getIntent().getStringExtra("category")){
+        loadItemsByCategory(category);
+        /*
+        switch(category){
             case "Snacks":
                 adapter.addShoppingItem(new ShoppingItem
                         (getDrawable(R.drawable.chipsy), "Chipsy", "185 RSD"));
@@ -192,7 +201,18 @@ public class ItemActivity extends AppCompatActivity implements View.OnClickListe
                         (getDrawable(R.drawable.twix), "Twix", "100 RSD"));
                 break;
         }
+        */
     }
+
+    private void loadItemsByCategory(String ctg) {
+        ShoppingItem[] items = dbHelper.getItemsByCategory(this, ctg);
+        if (items != null) {
+            for (ShoppingItem item : items) {
+                adapter.addShoppingItem(item);
+            }
+        }
+    }
+
 
     @Override
     public void onClick(View view) {
