@@ -10,11 +10,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Base64;
 
 import androidx.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Date;
 
 public class OnlineShopDbHelper extends SQLiteOpenHelper {
     private final String TABLE1_NAME = "korisnici";
@@ -28,6 +32,11 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
     public static final String TABLE2_ITEM_NAME = "itemName";
     public static final String TABLE2_CATEGORY = "category";
     public static final String TABLE2_PRICE = "price";
+
+    private final String TABLE3_NAME = "istorija_kupovine";
+    public static final String TABLE3_STATUS = "status";
+    public static final String TABLE3_DATE = "date";
+    public static final String TABLE3_PRICE = "price";
 
     public OnlineShopDbHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
@@ -45,6 +54,10 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
                 TABLE2_ITEM_NAME + " TEXT, " +
                 TABLE2_CATEGORY + " TEXT, " +
                 TABLE2_PRICE + " TEXT);");
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE3_NAME +
+                " (" + TABLE3_STATUS + " TEXT, " +
+                TABLE3_DATE + " TEXT, " +
+                TABLE3_PRICE + " TEXT);");
     }
 
     @Override
@@ -100,6 +113,23 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         values.put(TABLE2_PRICE, item.getPrice());
 
         db.insert(TABLE2_NAME, null, values);
+        close();
+    }
+
+    public void insertItemToPurchaseHistory(ShoppingItem item) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        // Get current date
+        long currentTimeMillis = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+        String formattedDate = sdf.format(new Date(currentTimeMillis));
+
+        ContentValues values = new ContentValues();
+        values.put(TABLE3_DATE, formattedDate);
+        values.put(TABLE3_PRICE, item.getPrice());
+        values.put(TABLE3_STATUS, "DELIVERED");
+
+        db.insert(TABLE3_NAME, null, values);
         close();
     }
 
@@ -388,5 +418,29 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         db.close();
 
         return items;
+    }
+
+    public PurchaseHistoryItem[] getAllPurchaseHistoryItems() {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE3_NAME, null, null, null, null, null, null);
+
+        if (cursor == null || cursor.getCount() <= 0) {
+            return null; // No items found
+        }
+
+        List<PurchaseHistoryItem> purchaseHistoryItemList = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            String date = cursor.getString(cursor.getColumnIndexOrThrow(TABLE3_DATE));
+            String price = cursor.getString(cursor.getColumnIndexOrThrow(TABLE3_PRICE));
+            String status = cursor.getString(cursor.getColumnIndexOrThrow(TABLE3_STATUS));
+
+            PurchaseHistoryItem item = new PurchaseHistoryItem(status, price, date);
+            purchaseHistoryItemList.add(item);
+        }
+
+        cursor.close();
+        db.close();
+
+        return purchaseHistoryItemList.toArray(new PurchaseHistoryItem[0]);
     }
 }

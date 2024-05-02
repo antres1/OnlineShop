@@ -16,9 +16,13 @@ public class ShoppingItemAdapter extends BaseAdapter {
     private Context myContext;
     private ArrayList<ShoppingItem> itemsList;
 
+    OnlineShopDbHelper dbHelper;
+    private final String DB_NAME = "OnlineShop.db";
+
     public ShoppingItemAdapter(Context myContext) {
         this.myContext = myContext;
         itemsList = new ArrayList<ShoppingItem>();
+        dbHelper = new OnlineShopDbHelper(myContext, DB_NAME, null, 1);
     }
 
     @Override
@@ -91,6 +95,7 @@ public class ShoppingItemAdapter extends BaseAdapter {
             @Override
             public void onClick(View view) {
                 String itemName = itemsList.get(i).getName();
+                dbHelper.insertItemToPurchaseHistory(itemsList.get(i));
                 Toast.makeText(myContext, "Predmet " + itemName + " dodat u korpu.", Toast.LENGTH_SHORT).show();
             }
         });

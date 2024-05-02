@@ -12,6 +12,9 @@ public class PurchaseHistoryActivity extends AppCompatActivity {
     TextView emptyTextView;
     PurchaseHistoryItemAdapter adapter;
 
+    OnlineShopDbHelper dbHelper;
+    private final String DB_NAME = "OnlineShop.db";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,9 +24,19 @@ public class PurchaseHistoryActivity extends AppCompatActivity {
         emptyTextView = findViewById(R.id.emptyListTextView);
         list.setEmptyView(emptyTextView);
 
+        dbHelper = new OnlineShopDbHelper(this, DB_NAME, null, 1);
+
         adapter = new PurchaseHistoryItemAdapter(this);
         list.setAdapter(adapter);
 
+        PurchaseHistoryItem[] purchaseHistoryItems = dbHelper.getAllPurchaseHistoryItems();
+        adapter.clearList();
+        if (purchaseHistoryItems != null && purchaseHistoryItems.length > 0) {
+            for (PurchaseHistoryItem item : purchaseHistoryItems) {
+                adapter.addPurchaseHistoryItem(item);
+            }
+        }
+        /*
         adapter.addPurchaseHistoryItem(new PurchaseHistoryItem("DELIVERED", "2000 RSD", "05.01.2024."));
         adapter.addPurchaseHistoryItem(new PurchaseHistoryItem("CANCELLED", "4000 RSD", "06.01.2024."));
         adapter.addPurchaseHistoryItem(new PurchaseHistoryItem("WAITING FOR DELIVERY", "3000 RSD", "07.01.2024."));
@@ -39,5 +52,6 @@ public class PurchaseHistoryActivity extends AppCompatActivity {
         adapter.addPurchaseHistoryItem(new PurchaseHistoryItem("DELIVERED", "1009 RSD", "01.01.2024."));
         adapter.addPurchaseHistoryItem(new PurchaseHistoryItem("DELIVERED", "1010 RSD", "01.01.2024."));
         adapter.addPurchaseHistoryItem(new PurchaseHistoryItem("DELIVERED", "1011 RSD", "01.01.2024."));
+         */
     }
 }
