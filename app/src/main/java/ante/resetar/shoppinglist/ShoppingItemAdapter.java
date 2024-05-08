@@ -15,14 +15,16 @@ import java.util.ArrayList;
 public class ShoppingItemAdapter extends BaseAdapter {
     private Context myContext;
     private ArrayList<ShoppingItem> itemsList;
+    private String username;
 
     OnlineShopDbHelper dbHelper;
     private final String DB_NAME = "OnlineShop.db";
 
-    public ShoppingItemAdapter(Context myContext) {
+    public ShoppingItemAdapter(Context myContext, String username) {
         this.myContext = myContext;
         itemsList = new ArrayList<ShoppingItem>();
         dbHelper = new OnlineShopDbHelper(myContext, DB_NAME, null, 1);
+        this.username = username;
     }
 
     @Override
@@ -95,7 +97,7 @@ public class ShoppingItemAdapter extends BaseAdapter {
             @Override
             public void onClick(View view) {
                 String itemName = itemsList.get(i).getName();
-                dbHelper.insertItemToPurchaseHistory(itemsList.get(i));
+                dbHelper.insertItemToPurchaseHistory(itemsList.get(i), username);
                 Toast.makeText(myContext, "Predmet " + itemName + " dodat u korpu.", Toast.LENGTH_SHORT).show();
             }
         });

@@ -14,6 +14,7 @@ public class ItemActivity extends AppCompatActivity implements View.OnClickListe
     TextView categoryText;
     ListView list;
     String category;
+    String username;
 
     ShoppingItemAdapter adapter;
 
@@ -33,8 +34,9 @@ public class ItemActivity extends AppCompatActivity implements View.OnClickListe
 
         dbHelper = new OnlineShopDbHelper(this, DB_NAME, null, 1);
 
+        username = getIntent().getStringExtra("username");
         list = findViewById(R.id.itemList);
-        adapter = new ShoppingItemAdapter(this);
+        adapter = new ShoppingItemAdapter(this, username);
         list.setAdapter(adapter);
 
         loadItemsByCategory(category);

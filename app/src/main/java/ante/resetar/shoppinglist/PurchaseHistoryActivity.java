@@ -11,6 +11,7 @@ public class PurchaseHistoryActivity extends AppCompatActivity {
     ListView list;
     TextView emptyTextView;
     PurchaseHistoryItemAdapter adapter;
+    String username;
 
     OnlineShopDbHelper dbHelper;
     private final String DB_NAME = "OnlineShop.db";
@@ -29,7 +30,9 @@ public class PurchaseHistoryActivity extends AppCompatActivity {
         adapter = new PurchaseHistoryItemAdapter(this);
         list.setAdapter(adapter);
 
-        PurchaseHistoryItem[] purchaseHistoryItems = dbHelper.getAllPurchaseHistoryItems();
+        username = getIntent().getStringExtra("username");
+
+        PurchaseHistoryItem[] purchaseHistoryItems = dbHelper.getAllPurchaseHistoryItems(username);
         adapter.clearList();
         if (purchaseHistoryItems != null && purchaseHistoryItems.length > 0) {
             for (PurchaseHistoryItem item : purchaseHistoryItems) {

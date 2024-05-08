@@ -35,6 +35,7 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
 
     private final String TABLE3_NAME = "istorija_kupovine";
     public static final String TABLE3_STATUS = "status";
+    public static final String TABLE3_USERNAME = "username";
     public static final String TABLE3_DATE = "date";
     public static final String TABLE3_PRICE = "price";
 
@@ -56,6 +57,7 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
                 TABLE2_PRICE + " TEXT);");
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE3_NAME +
                 " (" + TABLE3_STATUS + " TEXT, " +
+                TABLE3_USERNAME + " TEXT, " +
                 TABLE3_DATE + " TEXT, " +
                 TABLE3_PRICE + " TEXT);");
     }
@@ -116,7 +118,7 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         close();
     }
 
-    public void insertItemToPurchaseHistory(ShoppingItem item) {
+    public void insertItemToPurchaseHistory(ShoppingItem item, String username) {
         SQLiteDatabase db = getWritableDatabase();
 
         // Get current date
@@ -126,6 +128,7 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(TABLE3_DATE, formattedDate);
+        values.put(TABLE3_USERNAME, username);
         values.put(TABLE3_PRICE, item.getPrice());
         values.put(TABLE3_STATUS, "DELIVERED");
 
@@ -420,9 +423,9 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         return items;
     }
 
-    public PurchaseHistoryItem[] getAllPurchaseHistoryItems() {
+    public PurchaseHistoryItem[] getAllPurchaseHistoryItems(String username) {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(TABLE3_NAME, null, null, null, null, null, null);
+        Cursor cursor = db.query(TABLE3_NAME, null, TABLE3_USERNAME + " = ?", new String[]{username}, null, null, null);
 
         if (cursor == null || cursor.getCount() <= 0) {
             return null; // No items found

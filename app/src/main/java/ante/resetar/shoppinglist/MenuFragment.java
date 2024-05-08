@@ -120,6 +120,7 @@ public class MenuFragment extends Fragment {
 
                 Intent intent = new Intent(getActivity(), ItemActivity.class);
                 intent.putExtra("category", clickedString);
+                intent.putExtra("username", getActivity().getIntent().getStringExtra("username"));
                 getActivity().startActivity(intent);
             }
         });
