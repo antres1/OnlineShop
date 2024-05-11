@@ -26,6 +26,7 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
     public static final String TABLE1_MAIL = "mail";
     public static final String TABLE1_PASSWORD = "password";
     public static final String TABLE1_ID = "ID";
+    public static final String TABLE1_ADMIN_STATUS = "isAdmin";
 
     private final String TABLE2_NAME = "stavke";
     public static final String TABLE2_IMAGE_NAME = "imageName";
@@ -49,6 +50,7 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
                 " (" + TABLE1_USERNAME + " TEXT, " +
                 TABLE1_MAIL + " TEXT, " +
                 TABLE1_PASSWORD + " TEXT, " +
+                TABLE1_ADMIN_STATUS + " INTEGER, " +
                 TABLE1_ID + " INTEGER PRIMARY KEY AUTOINCREMENT);");
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE2_NAME +
                 " (" + TABLE2_IMAGE_NAME + " BLOB, " +
@@ -67,13 +69,17 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
 
     }
 
-    public void insertUser(User user) {
+    public void insertUser(User user, boolean isAdmin) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(TABLE1_USERNAME, user.getUsername());
         values.put(TABLE1_MAIL, user.getMail());
         values.put(TABLE1_PASSWORD, user.getPassword());
+        if(isAdmin)
+            values.put(TABLE1_ADMIN_STATUS, 1);
+        else
+            values.put(TABLE1_ADMIN_STATUS, 0);
 
         db.insert(TABLE1_NAME, null, values);
         close();
@@ -445,5 +451,41 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         db.close();
 
         return purchaseHistoryItemList.toArray(new PurchaseHistoryItem[0]);
+    }
+
+    public boolean isAdmin(String username){
+        SQLiteDatabase db = getReadableDatabase();
+
+        // Define the columns you want to retrieve
+        String[] projection = {TABLE1_ADMIN_STATUS};
+
+        // Define the selection criteria
+        String selection = TABLE1_USERNAME + " = ?";
+
+        // Define the selection arguments
+        String[] selectionArgs = {username};
+
+        // Perform the query
+        Cursor cursor = db.query(
+                TABLE1_NAME,    // The table to query
+                projection,     // The columns to return
+                selection,      // The columns for the WHERE clause
+                selectionArgs,  // The values for the WHERE clause
+                null,           // Don't group the rows
+                null,           // Don't filter by row groups
+                null            // The sort order
+        );
+
+        boolean isAdmin = false;
+        if (cursor.moveToFirst()) {
+            int isAdminValue = cursor.getInt(cursor.getColumnIndexOrThrow(TABLE1_ADMIN_STATUS));
+            isAdmin = isAdminValue == 1;
+        }
+
+        // Close the cursor and database connection
+        cursor.close();
+        db.close();
+
+        return isAdmin;
     }
 }

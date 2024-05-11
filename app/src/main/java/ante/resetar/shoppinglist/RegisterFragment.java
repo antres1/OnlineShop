@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -23,6 +24,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     EditText passwordEditText;
     Button registerButton;
     Bundle bundle;
+    CheckBox adminCheckbox;
 
     OnlineShopDbHelper dbHelper;
     private final String DB_NAME = "OnlineShop.db";
@@ -78,6 +80,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         passwordEditText = v.findViewById(R.id.passwordEditText);
         registerButton = v.findViewById(R.id.registerButton);
         registerButton.setOnClickListener(this);
+        adminCheckbox = v.findViewById(R.id.adminCheckbox);
 
         dbHelper = new OnlineShopDbHelper(getContext(), DB_NAME, null, 1);
 
@@ -91,10 +94,11 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                 String username = usernameEditText.getText().toString().trim();
                 String mail = emailEditText.getText().toString().trim();
                 String password = passwordEditText.getText().toString();
+                boolean isAdmin = adminCheckbox.isChecked();
 
                 if(!username.isEmpty() && !mail.isEmpty() && !password.isEmpty()){
                     if(!dbHelper.userExists(username)){
-                        dbHelper.insertUser(new User(username, mail, password));
+                        dbHelper.insertUser(new User(username, mail, password), isAdmin);
                         Intent intent = new Intent(getActivity(), HomeActivity.class);
                         bundle = new Bundle();
                         bundle.putString("username", username);
