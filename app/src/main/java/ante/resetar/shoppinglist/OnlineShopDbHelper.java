@@ -51,7 +51,7 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
                 TABLE1_MAIL + " TEXT, " +
                 TABLE1_PASSWORD + " TEXT, " +
                 TABLE1_ADMIN_STATUS + " INTEGER, " +
-                TABLE1_ID + " INTEGER PRIMARY KEY AUTOINCREMENT);");
+                TABLE1_ID + " TEXT);");
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE2_NAME +
                 " (" + TABLE2_IMAGE_NAME + " BLOB, " +
                 TABLE2_ITEM_NAME + " TEXT, " +
@@ -69,13 +69,14 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
 
     }
 
-    public void insertUser(User user, boolean isAdmin) {
+    public void insertUser(User user, String id, boolean isAdmin) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(TABLE1_USERNAME, user.getUsername());
         values.put(TABLE1_MAIL, user.getMail());
         values.put(TABLE1_PASSWORD, user.getPassword());
+        values.put(TABLE1_ID, id);
         if(isAdmin)
             values.put(TABLE1_ADMIN_STATUS, 1);
         else

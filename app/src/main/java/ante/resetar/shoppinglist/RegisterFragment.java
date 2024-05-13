@@ -12,6 +12,11 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link RegisterFragment#newInstance} factory method to
@@ -28,6 +33,9 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
 
     OnlineShopDbHelper dbHelper;
     private final String DB_NAME = "OnlineShop.db";
+
+    HTTPHelper httpHelper;
+    public static String BASE_URL = "http://10.0.2.2:3000/";
 
 
     // TODO: Rename parameter arguments, choose names that match
@@ -83,6 +91,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         adminCheckbox = v.findViewById(R.id.adminCheckbox);
 
         dbHelper = new OnlineShopDbHelper(getContext(), DB_NAME, null, 1);
+        httpHelper = new HTTPHelper();
 
         return v;
     }
@@ -96,6 +105,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                 String password = passwordEditText.getText().toString();
                 boolean isAdmin = adminCheckbox.isChecked();
 
+                /*
                 if(!username.isEmpty() && !mail.isEmpty() && !password.isEmpty()){
                     if(!dbHelper.userExists(username)){
                         dbHelper.insertUser(new User(username, mail, password), isAdmin);
@@ -108,6 +118,57 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                         Toast.makeText(getActivity(), "User already exists", Toast.LENGTH_LONG).show();
                     }
 
+                }
+                 */
+                if(!username.isEmpty() && !mail.isEmpty() && !password.isEmpty()){
+                    final String[] id = new String[1];
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try
+                            {
+                                JSONObject jsonObject = httpHelper.createUser(username, mail, password, isAdmin);
+                                if(jsonObject == null)
+                                {
+                                    try {
+                                        getActivity().runOnUiThread(new Runnable() {
+                                            public void run() {
+                                                Toast.makeText(getActivity(), "Failed to register", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                    Thread.currentThread().stop();
+                                }
+                                try {
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        public void run() {
+                                            Toast.makeText(getActivity(), "Registered successfully", Toast.LENGTH_SHORT).show();
+                                            try {
+                                                id[0] = jsonObject.getString("_id");
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                dbHelper.insertUser(new User(username, mail, password), id[0], isAdmin);
+                                Intent intent = new Intent(getActivity(), HomeActivity.class);
+                                Bundle loginInfo = new Bundle();
+                                loginInfo.putString("username", username);
+                                intent.putExtras(loginInfo);
+                                startActivity(intent);
+                            }catch (Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+                        }
+                    }).start();
+                }else{
+                    Toast.makeText(getActivity(), "Invalid input", Toast.LENGTH_LONG).show();
                 }
                 break;
             default:

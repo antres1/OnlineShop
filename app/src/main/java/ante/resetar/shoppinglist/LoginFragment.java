@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -23,6 +24,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     OnlineShopDbHelper dbHelper;
     private final String DB_NAME = "OnlineShop.db";
+
+    HTTPHelper httpHelper;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -78,6 +81,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         dbHelper = new OnlineShopDbHelper(getContext(), DB_NAME, null, 1);
 
+        httpHelper = new HTTPHelper();
+
         return v;
     }
 
@@ -85,20 +90,36 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.loginButton:
-                /*
-                if(loginUsernameEditText.getText().toString().equals("admin") && loginPaswordEditText.getText().toString().equals("admin")){
-                    Intent intent = new Intent(getActivity(), HomeActivity.class);
-                    intent.putExtra("username", loginUsernameEditText.getText().toString());
-                    startActivity(intent);
-                }
-                 */
                 String username = loginUsernameEditText.getText().toString();
                 String pass = loginPaswordEditText.getText().toString();
-                if(dbHelper.correctUsernameAndPassword(username, pass)){
-                    Intent intent = new Intent(getActivity(), HomeActivity.class);
-                    intent.putExtra("username", loginUsernameEditText.getText().toString());
-                    startActivity(intent);
-                }
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try
+                        {
+                            if(!httpHelper.loginUser(username, pass))
+                            {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity(), "Wrong username or password", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                                Thread.currentThread().stop();
+                            }
+                            Intent intent = new Intent(getActivity(), HomeActivity.class);
+                            Bundle loginInfo = new Bundle();
+                            loginInfo.putString("username", username);
+                            intent.putExtras(loginInfo);
+                            startActivity(intent);
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
                 break;
             default:
                 break;
