@@ -133,7 +133,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                                     try {
                                         getActivity().runOnUiThread(new Runnable() {
                                             public void run() {
-                                                Toast.makeText(getActivity(), "Failed to register", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(getActivity(), "Failed to register", Toast.LENGTH_LONG).show();
                                             }
                                         });
                                     } catch (Exception e) {
@@ -144,7 +144,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
                                 try {
                                     getActivity().runOnUiThread(new Runnable() {
                                         public void run() {
-                                            Toast.makeText(getActivity(), "Registered successfully", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getActivity(), "Registered successfully", Toast.LENGTH_LONG).show();
                                             try {
                                                 id[0] = jsonObject.getString("_id");
                                             } catch (JSONException e) {
