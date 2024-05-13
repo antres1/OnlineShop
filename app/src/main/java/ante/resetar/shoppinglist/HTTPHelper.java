@@ -243,4 +243,71 @@ public class HTTPHelper {
         return responseCode==SUCCESS?jsonResponse:null;
     }
 
+    public boolean addCategory(String category) throws IOException, JSONException {
+        String urlString = BASE_URL + "/category";
+        HttpURLConnection urlConnection = null;
+        java.net.URL url = new URL(urlString);
+        urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod("POST");
+        urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+        urlConnection.setRequestProperty("Accept","application/json");
+        /*needed when used POST or PUT methods*/
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", category);
+
+        urlConnection.setDoOutput(true);
+        urlConnection.setDoInput(true);
+        try {
+            urlConnection.connect();
+        } catch (IOException e) {
+            return false;
+        }
+        DataOutputStream os = new DataOutputStream(urlConnection.getOutputStream());
+        /*write json object*/
+        os.writeBytes(jsonObject.toString());
+        os.flush();
+        os.close();
+        int responseCode =  urlConnection.getResponseCode();
+        Log.i("STATUS", String.valueOf(urlConnection.getResponseCode()));
+        Log.i("MSG" , urlConnection.getResponseMessage());
+        urlConnection.disconnect();
+        return (responseCode==SUCCESS);
+    }
+
+    public boolean addItemToCategory(String name, String price, String category, String imageName) throws IOException, JSONException {
+        String urlString = BASE_URL + "/item";
+        HttpURLConnection urlConnection = null;
+        java.net.URL url = new URL(urlString);
+        urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod("POST");
+        urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+        urlConnection.setRequestProperty("Accept","application/json");
+        /*needed when used POST or PUT methods*/
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", name);
+        jsonObject.put("price", price);
+        jsonObject.put("category", category);
+        jsonObject.put("imageName", imageName);
+
+        urlConnection.setDoOutput(true);
+        urlConnection.setDoInput(true);
+        try {
+            urlConnection.connect();
+        } catch (IOException e) {
+            return false;
+        }
+        DataOutputStream os = new DataOutputStream(urlConnection.getOutputStream());
+        /*write json object*/
+        os.writeBytes(jsonObject.toString());
+        os.flush();
+        os.close();
+        int responseCode =  urlConnection.getResponseCode();
+        Log.i("STATUS", String.valueOf(urlConnection.getResponseCode()));
+        Log.i("MSG" , urlConnection.getResponseMessage());
+        urlConnection.disconnect();
+        return (responseCode==SUCCESS);
+    }
+
 }
