@@ -2,6 +2,7 @@ package ante.resetar.shoppinglist;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,7 +17,7 @@ import java.net.URL;
 public class HTTPHelper {
 
     private static final int SUCCESS = 200;
-    public static String BASE_URL = "http://192.168.1.9:3000";
+    public static String BASE_URL = "http://192.168.8.138:3000";
 
     /*HTTP get json object*/
     public JSONObject getJSONObjectFromURL(String urlString) throws IOException, JSONException {
@@ -308,6 +309,64 @@ public class HTTPHelper {
         Log.i("MSG" , urlConnection.getResponseMessage());
         urlConnection.disconnect();
         return (responseCode==SUCCESS);
+    }
+
+    public JSONArray getAllItems() throws IOException, JSONException {
+        String urlString = BASE_URL + "/item";
+        HttpURLConnection urlConnection = null;
+        java.net.URL url = new URL(urlString);
+        urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+        urlConnection.setRequestProperty("Accept","application/json");
+        /*needed when used POST or PUT methods*/
+        try {
+            urlConnection.connect();
+        } catch (IOException e) {
+            return null;
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line + "\n");
+        }
+        br.close();
+        String jsonString = sb.toString();
+        Log.d("HTTP GET", "JSON data- " + jsonString);
+        int responseCode =  urlConnection.getResponseCode();
+        urlConnection.disconnect();
+
+        return responseCode == SUCCESS ? new JSONArray(jsonString) : null;
+    }
+
+    public JSONArray getItemsByCategory(String category) throws IOException, JSONException {
+        String urlString = BASE_URL + "/item/" + category;
+        HttpURLConnection urlConnection = null;
+        java.net.URL url = new URL(urlString);
+        urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+        urlConnection.setRequestProperty("Accept","application/json");
+        /*needed when used POST or PUT methods*/
+        try {
+            urlConnection.connect();
+        } catch (IOException e) {
+            return null;
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line + "\n");
+        }
+        br.close();
+        String jsonString = sb.toString();
+        Log.d("HTTP GET", "JSON data- " + jsonString);
+        int responseCode =  urlConnection.getResponseCode();
+        urlConnection.disconnect();
+
+        return responseCode == SUCCESS ? new JSONArray(jsonString) : null;
     }
 
 }

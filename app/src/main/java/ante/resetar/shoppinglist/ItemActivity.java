@@ -1,5 +1,7 @@
 package ante.resetar.shoppinglist;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -7,6 +9,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class ItemActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -20,6 +29,8 @@ public class ItemActivity extends AppCompatActivity implements View.OnClickListe
 
     OnlineShopDbHelper dbHelper;
     private final String DB_NAME = "OnlineShop.db";
+
+    HTTPHelper httpHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +50,46 @@ public class ItemActivity extends AppCompatActivity implements View.OnClickListe
         adapter = new ShoppingItemAdapter(this, username);
         list.setAdapter(adapter);
 
-        loadItemsByCategory(category);
+        httpHelper = new HTTPHelper();
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    JSONArray items = httpHelper.getItemsByCategory(category);
+                    try {
+                            runOnUiThread(new Runnable() {
+                            public void run() {
+                                if(items != null){
+                                    ArrayList<ShoppingItem> foundItems = new ArrayList<ShoppingItem>();
+                                    for(int i = 0; i < items.length(); i++){
+                                        try {
+                                            JSONObject item = items.getJSONObject(i);
+                                            String name = item.getString("name");
+                                            String price = item.getString("price");
+                                            String category = item.getString("category");
+                                            String imageName = item.getString("imageName");
+                                            ShoppingItem foundItem = new ShoppingItem(getDrawableFromName(ItemActivity.this, imageName), name, price, category);
+                                            foundItems.add(foundItem);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    for(ShoppingItem item: foundItems) {
+                                        adapter.addShoppingItem(item);
+                                    }
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+        //loadItemsByCategory(category);
         /*
         switch(category){
             case "Snacks":
@@ -206,15 +256,27 @@ public class ItemActivity extends AppCompatActivity implements View.OnClickListe
         */
     }
 
-    private void loadItemsByCategory(String ctg) {
-        ShoppingItem[] items = dbHelper.getItemsByCategory(this, ctg);
-        if (items != null) {
-            for (ShoppingItem item : items) {
-                adapter.addShoppingItem(item);
-            }
+    public Drawable getDrawableFromName(Context context, String imageName) {
+        // Get the resource ID of the drawable
+        int resourceId = context.getResources().getIdentifier(imageName, "drawable", context.getPackageName());
+
+        // If resource ID is valid, return the drawable
+        if (resourceId != 0) {
+            return context.getResources().getDrawable(resourceId, null);
+        } else {
+            // Return null if resource ID is not found
+            return null;
         }
     }
 
+//    private void loadItemsByCategory(String ctg) {
+//        ShoppingItem[] items = dbHelper.getItemsByCategory(this, ctg);
+//        if (items != null) {
+//            for (ShoppingItem item : items) {
+//                adapter.addShoppingItem(item);
+//            }
+//        }
+//    }
 
     @Override
     public void onClick(View view) {

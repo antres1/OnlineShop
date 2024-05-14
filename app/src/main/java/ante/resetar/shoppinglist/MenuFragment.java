@@ -15,6 +15,15 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link MenuFragment#newInstance} factory method to
@@ -42,6 +51,7 @@ public class MenuFragment extends Fragment {
     Button menuButton;
     private MenuButtonChangeListener callback;
     ListView list1;
+    HTTPHelper httpHelper;
 
     @Override
     public void onAttach(Context context) {
@@ -100,15 +110,53 @@ public class MenuFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1);
         list1.setAdapter(adapter);
         dbHelper = new OnlineShopDbHelper(getContext(), DB_NAME, null, 1);
+        httpHelper = new HTTPHelper();
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    JSONArray items = httpHelper.getAllItems();
+                    try {
+                        getActivity().runOnUiThread(new Runnable() {
+                            public void run() {
+                                if(items != null){
+                                    ArrayList<String> categories = new ArrayList<String>();
+                                    for(int i = 0; i < items.length(); i++){
+                                        try {
+                                            JSONObject item = items.getJSONObject(i);
+                                            String ctg = item.getString("category");
+                                            if(!categories.contains(ctg))
+                                            {
+                                                categories.add(ctg);
+                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    for(String category: categories) {
+                                        adapter.add(category);
+                                    }
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
 
-        String[] categories = dbHelper.findCategories();
-        if (categories == null || categories.length == 0) {
-            insertItemsIntoDatabase();
-            categories = dbHelper.findCategories();
-        }
-        for (String category : categories) {
-            adapter.add(category);
-        }
+//        String[] categories = dbHelper.findCategories();
+//        if (categories == null || categories.length == 0) {
+//            insertItemsIntoDatabase();
+//            categories = dbHelper.findCategories();
+//        }
+//        for (String category : categories) {
+//            adapter.add(category);
+//        }
 
         list1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
