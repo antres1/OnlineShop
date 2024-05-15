@@ -79,15 +79,15 @@ public class PasswordActivity extends AppCompatActivity {
                     }
                 }).start();
 
-                if (dbHelper.correctPassword(username, currentPassword)) {
-                    if (dbHelper.updatePassword(username, newPassword)) {
-                        Toast.makeText(PasswordActivity.this, "Password updated successfully", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(PasswordActivity.this, "Failed to update password", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(PasswordActivity.this, "Incorrect current password", Toast.LENGTH_SHORT).show();
-                }
+//                if (dbHelper.correctPassword(username, currentPassword)) {
+//                    if (dbHelper.updatePassword(username, newPassword)) {
+//                        Toast.makeText(PasswordActivity.this, "Password updated successfully", Toast.LENGTH_LONG).show();
+//                    } else {
+//                        Toast.makeText(PasswordActivity.this, "Failed to update password", Toast.LENGTH_LONG).show();
+//                    }
+//                } else {
+//                    Toast.makeText(PasswordActivity.this, "Incorrect current password", Toast.LENGTH_SHORT).show();
+//                }
             }
         });
     }
