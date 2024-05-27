@@ -81,8 +81,8 @@ public class SaleService extends Service {
         Intent intent = new Intent(this, HomeActivity.class);
         intent.putExtra("isSale", true);
         intent.putExtra("username", "ante"); //HARDCODED, NEEDS TO BE IMPLEMENTED CORRECTLY
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), "1")
                 .setSmallIcon(R.mipmap.ic_launcher) // notification icon
                 .setContentTitle("SALE!") // title for notification
