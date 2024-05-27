@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -116,7 +117,9 @@ public class OnlineShopDbHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         Bitmap bitmap = drawableToBitmap(item.getImage());
         byte[] imageBytes = bitmapToByteArray(bitmap);
-        values.put(TABLE2_IMAGE_NAME, imageBytes);
+        if (imageBytes != null) { // Check if imageBytes is not null
+            values.put(TABLE2_IMAGE_NAME, imageBytes);
+        }
         values.put(TABLE2_ITEM_NAME, item.getName());
         values.put(TABLE2_CATEGORY, item.getCategory());
         values.put(TABLE2_PRICE, item.getPrice());

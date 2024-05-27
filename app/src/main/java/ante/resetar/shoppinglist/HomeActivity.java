@@ -1,9 +1,13 @@
 package ante.resetar.shoppinglist;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,7 +17,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
-public class HomeActivity extends AppCompatActivity implements View.OnClickListener, MenuFragment.MenuButtonChangeListener {
+public class HomeActivity extends AppCompatActivity implements View.OnClickListener, MenuFragment.MenuButtonChangeListener, ServiceConnection {
 
     OnlineShopDbHelper dbHelper;
     private final String DB_NAME = "OnlineShop.db";
@@ -40,6 +44,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     EditText addCategoryEditText;
 
     private String username;
+
+    private IMyAidlInterface binderInterface = null;
 
     private void displayUsernameAndWelcome() {
         usernameTextView.setVisibility(View.VISIBLE);
@@ -110,18 +116,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         addItemButton.setOnClickListener(this);
         addCategoryButton.setOnClickListener(this);
 
-//        if (getIntent() != null && getIntent().getExtras() != null) {
-//            String fragmentTag = getIntent().getStringExtra("return_to_fragment");
-//            if (fragmentTag != null) {
-//                if (fragmentTag.equals(getString(R.string.MenuFragmentTag))) {
-//                    usernameTextView.setVisibility(View.INVISIBLE);
-//                    welcomeTextView.setVisibility(View.INVISIBLE);
-//                    getSupportFragmentManager().beginTransaction()
-//                            .replace(R.id.homeFrame, menuFragment)
-//                            .commit();
-//                }
-//            }
-//        }
+        Intent intent = new Intent(HomeActivity.this, SaleService.class);
+        bindService(intent, HomeActivity.this, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -283,5 +279,42 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onMenuButtonColorChange(int color) {
         buttonMenu.setBackgroundColor(color);
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        Log.d("ServiceTAG", "onServiceConnected");
+        binderInterface = IMyAidlInterface.Stub.asInterface(iBinder);
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+        binderInterface = null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        unbindService(HomeActivity.this);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onStart() {
+        username = getIntent().getStringExtra("username");
+        super.onStart();
+//        if(getIntent().getBooleanExtra("is_sale", false)){
+//            usernameTextView.setVisibility(View.INVISIBLE);
+//            welcomeTextView.setVisibility(View.INVISIBLE);
+//            addItemButton.setVisibility(View.INVISIBLE);
+//            itemName.setVisibility(View.INVISIBLE);
+//            itemPrice.setVisibility(View.INVISIBLE);
+//            itemCategory.setVisibility(View.INVISIBLE);
+//            imageName.setVisibility(View.INVISIBLE);
+//            addCategoryEditText.setVisibility(View.INVISIBLE);
+//            addCategoryButton.setVisibility(View.INVISIBLE);
+//            getSupportFragmentManager().beginTransaction().replace(R.id.homeFrame, menuFragment)
+//                    .addToBackStack(getString(R.string.HomeActivityTag))
+//                    .commit();
+//        }
     }
 }
