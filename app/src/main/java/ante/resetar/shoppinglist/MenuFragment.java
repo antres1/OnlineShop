@@ -2,7 +2,9 @@ package ante.resetar.shoppinglist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -100,6 +102,9 @@ public class MenuFragment extends Fragment {
         }
     }
 
+    boolean isSale = false;
+    IMyAidlInterface binderInterface = null;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -169,9 +174,31 @@ public class MenuFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), ItemActivity.class);
                 intent.putExtra("category", clickedString);
                 intent.putExtra("username", getActivity().getIntent().getStringExtra("username"));
+                intent.putExtra("isSale", isSale);
                 getActivity().startActivity(intent);
             }
         });
+        //Binding the service
+        Intent intent = new Intent(getActivity(), SaleService.class);
+        requireActivity().bindService(intent, (ServiceConnection) getActivity(), Context.BIND_AUTO_CREATE);
+        binderInterface = ((HomeActivity)getActivity()).getBinder();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true)
+                {
+                    try {
+                        isSale = binderInterface.getSale();
+                        Thread.sleep(1000);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        thread.start();
         return view;
     }
 

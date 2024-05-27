@@ -17,7 +17,7 @@ import java.net.URL;
 public class HTTPHelper {
 
     private static final int SUCCESS = 200;
-    public static String BASE_URL = "http://192.168.159.138:3000";
+    public static String BASE_URL = "http://192.168.1.14:3000";
 
     /*HTTP get json object*/
     public JSONObject getJSONObjectFromURL(String urlString) throws IOException, JSONException {

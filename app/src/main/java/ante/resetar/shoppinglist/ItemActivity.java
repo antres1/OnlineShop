@@ -1,6 +1,9 @@
 package ante.resetar.shoppinglist;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
@@ -32,10 +35,24 @@ public class ItemActivity extends AppCompatActivity implements View.OnClickListe
 
     HTTPHelper httpHelper;
 
+    private BroadcastReceiver finishActivityReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item);
+
+        finishActivityReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                getIntent().putExtra("isSale", false);
+                if ("com.example.FINISH_ACTIVITY".equals(intent.getAction())) {
+                    finish();
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter("com.example.FINISH_ACTIVITY");
+        registerReceiver(finishActivityReceiver, filter);
 
         backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(this);

@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -285,6 +286,29 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         Log.d("ServiceTAG", "onServiceConnected");
         binderInterface = IMyAidlInterface.Stub.asInterface(iBinder);
+        try {
+            binderInterface.setUsername(getIntent().getStringExtra("username"));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        try {
+            if(binderInterface.getSale()){
+                usernameTextView.setVisibility(View.INVISIBLE);
+                welcomeTextView.setVisibility(View.INVISIBLE);
+                addItemButton.setVisibility(View.INVISIBLE);
+                itemName.setVisibility(View.INVISIBLE);
+                itemPrice.setVisibility(View.INVISIBLE);
+                itemCategory.setVisibility(View.INVISIBLE);
+                imageName.setVisibility(View.INVISIBLE);
+                addCategoryEditText.setVisibility(View.INVISIBLE);
+                addCategoryButton.setVisibility(View.INVISIBLE);
+                getSupportFragmentManager().beginTransaction().replace(R.id.homeFrame, menuFragment)
+                        .addToBackStack(getString(R.string.HomeActivityTag))
+                        .commit();
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -298,23 +322,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
     }
 
-    @Override
-    protected void onStart() {
-        username = getIntent().getStringExtra("username");
-        super.onStart();
-//        if(getIntent().getBooleanExtra("is_sale", false)){
-//            usernameTextView.setVisibility(View.INVISIBLE);
-//            welcomeTextView.setVisibility(View.INVISIBLE);
-//            addItemButton.setVisibility(View.INVISIBLE);
-//            itemName.setVisibility(View.INVISIBLE);
-//            itemPrice.setVisibility(View.INVISIBLE);
-//            itemCategory.setVisibility(View.INVISIBLE);
-//            imageName.setVisibility(View.INVISIBLE);
-//            addCategoryEditText.setVisibility(View.INVISIBLE);
-//            addCategoryButton.setVisibility(View.INVISIBLE);
-//            getSupportFragmentManager().beginTransaction().replace(R.id.homeFrame, menuFragment)
-//                    .addToBackStack(getString(R.string.HomeActivityTag))
-//                    .commit();
-//        }
+    public IMyAidlInterface getBinder() {
+        return binderInterface;
     }
 }

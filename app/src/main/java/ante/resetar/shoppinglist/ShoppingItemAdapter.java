@@ -1,6 +1,7 @@
 package ante.resetar.shoppinglist;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,7 +92,17 @@ public class ShoppingItemAdapter extends BaseAdapter {
         }
         /* Get data Object on position from list/database */
         viewHolder.name.setText(itemsList.get(i).getName());
-        viewHolder.price.setText(itemsList.get(i).getPrice());
+        String price = itemsList.get(i).getPrice();
+        if(((ItemActivity)myContext).getIntent().getExtras().getBoolean("isSale", false)){
+            String priceString = price.substring(0, price.length() - 4);
+            float newPrice = Float.parseFloat(priceString.trim());
+            newPrice = newPrice * 0.8f;
+            price = String.valueOf((int)newPrice + " RSD");
+            viewHolder.price.setTextColor(((ItemActivity)myContext).getResources().getColor(R.color.red));
+        }
+        Log.d("CENaaa", price);
+        itemsList.get(i).setPrice(price);
+        viewHolder.price.setText(price);
         viewHolder.image.setImageDrawable(itemsList.get(i).getImage());
         viewHolder.addButton.setOnClickListener(new View.OnClickListener() {
             @Override
