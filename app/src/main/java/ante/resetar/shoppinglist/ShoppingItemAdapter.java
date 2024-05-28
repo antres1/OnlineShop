@@ -92,23 +92,25 @@ public class ShoppingItemAdapter extends BaseAdapter {
         }
         /* Get data Object on position from list/database */
         viewHolder.name.setText(itemsList.get(i).getName());
-        String price = itemsList.get(i).getPrice();
+        final String oldPrice = itemsList.get(i).getPrice();
+        String newPrice = oldPrice;
         if(((ItemActivity)myContext).getIntent().getExtras().getBoolean("isSale", false)){
-            String priceString = price.substring(0, price.length() - 4);
-            float newPrice = Float.parseFloat(priceString.trim());
-            newPrice = newPrice * 0.8f;
-            price = String.valueOf((int)newPrice + " RSD");
+            String priceString = newPrice.substring(0, newPrice.length() - 4);
+            float price = Float.parseFloat(priceString.trim());
+            price = price * 0.8f;
+            newPrice = String.valueOf((int)price + " RSD");
             viewHolder.price.setTextColor(((ItemActivity)myContext).getResources().getColor(R.color.red));
         }
-        Log.d("CENaaa", price);
-        itemsList.get(i).setPrice(price);
-        viewHolder.price.setText(price);
+        final String finalPrice = newPrice;
+        viewHolder.price.setText(finalPrice);
         viewHolder.image.setImageDrawable(itemsList.get(i).getImage());
         viewHolder.addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String itemName = itemsList.get(i).getName();
+                itemsList.get(i).setPrice(finalPrice);
                 dbHelper.insertItemToPurchaseHistory(itemsList.get(i), username);
+                itemsList.get(i).setPrice(oldPrice);
                 Toast.makeText(myContext, "Predmet " + itemName + " dodat u korpu.", Toast.LENGTH_SHORT).show();
             }
         });
